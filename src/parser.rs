@@ -11,6 +11,7 @@ pub enum AST {
     Negate(Box<AST>),
     Call(String, Vec<AST>),
     Let(String, Box<AST>),
+    Chain(Vec<AST>),
     Number(f64),
     Identifier(String),
 }
@@ -64,8 +65,9 @@ macro_rules! accept_token {
 // poses some restrictions on the grammar but for such a small language it
 // doesn't matter.
 
-// LL(1) grammar for calculator
+// LL(1) grammar for pebble
 
+// stmts = stmt (";" stmt)*
 // stmt = "let" IDENTIFIER "=" expr | expr;
 // expr = additive-expr;
 // additive-expr = multiplicative-expr (("+"|"-") multiplicative-expr)*;
@@ -76,6 +78,22 @@ macro_rules! accept_token {
 //              | var-or-call
 //              | "(" expr ")";
 // var-or-call = IDENTIFIER ( "(" (expr ("," expr)*)? ")" )?;
+
+pub fn parse_stmts<T>(iter: &mut Peekable<T>) -> Result<AST, ParseError>
+where
+    T: Iterator<Item = Token>,
+{
+    let mut chain: Vec<AST> = Vec::new();
+    chain.push(parse_stmt(iter)?);
+    loop {
+        accept_token!(iter, Token::Semicolon {
+            chain.push(parse_stmt(iter)?);
+            continue;
+        });
+        break;
+    }
+    Ok(AST::Chain(chain))
+}
 
 pub fn parse_stmt<T>(iter: &mut Peekable<T>) -> Result<AST, ParseError>
 where

@@ -64,5 +64,13 @@ pub fn evaluate(tree: &AST) -> Result<f64, String> {
             println!("{} = {}", name, val);
             Ok(val)
         }
+        AST::Chain(chain) => {
+            let mut val = 0f64;
+            for statement in chain {
+                val = evaluate(statement)?;
+                println!("= {}", val);
+            }
+            Ok(val)
+        }
     }
 }
