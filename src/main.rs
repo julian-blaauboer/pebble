@@ -16,7 +16,7 @@ fn main() {
             input: s.chars().peekable(),
         }
         .peekable();
-        let tree = parser::parse_expr(&mut lexer);
+        let tree = parser::parse_stmt(&mut lexer);
         match tree {
             Ok(x) => match backend::evaluate(&x) {
                 Ok(y) => println!("= {}", y),

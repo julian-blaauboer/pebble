@@ -59,5 +59,10 @@ pub fn evaluate(tree: &AST) -> Result<f64, String> {
             id,
             params.len()
         )),
+        AST::Let(name, expr) => {
+            let val = evaluate(&expr)?;
+            println!("{} = {}", name, val);
+            Ok(val)
+        }
     }
 }

@@ -10,6 +10,8 @@ pub enum Token {
     LParen,
     RParen,
     Comma,
+    Equals,
+    Let,
     Number(f64),
     Identifier(String),
 }
@@ -54,6 +56,14 @@ where
         }
         Some(text)
     }
+
+    // Helper function for parsing reserved words
+    fn parse_reserved(word: String) -> Token {
+        match &word[..] {
+            "let" => Token::Let,
+            _ => Token::Identifier(word),
+        }
+    }
 }
 
 impl<T> Iterator for Tokenizer<T>
@@ -72,8 +82,9 @@ where
             '(' => LParen,
             ')' => RParen,
             ',' => Comma,
+            '=' => Equals,
             x @ '0'..='9' => Number(self.parse_number(x)?),
-            x @ 'a'..='z' => Identifier(self.parse_identifier(x)?),
+            x @ 'a'..='z' => Tokenizer::<T>::parse_reserved(self.parse_identifier(x)?),
             _ => return None,
         })
     }

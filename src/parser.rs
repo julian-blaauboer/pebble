@@ -10,6 +10,7 @@ pub enum AST {
     Divide(Box<AST>, Box<AST>),
     Negate(Box<AST>),
     Call(String, Vec<AST>),
+    Let(String, Box<AST>),
     Number(f64),
     Identifier(String),
 }
@@ -65,6 +66,7 @@ macro_rules! accept_token {
 
 // LL(1) grammar for calculator
 
+// stmt = "let" IDENTIFIER "=" expr | expr;
 // expr = additive-expr;
 // additive-expr = multiplicative-expr (("+"|"-") multiplicative-expr)*;
 // multiplicative-expr = unary-expr (("*"|"/") unary-expr)*;
@@ -75,6 +77,17 @@ macro_rules! accept_token {
 //              | "(" expr ")";
 // var-or-call = IDENTIFIER ( "(" (expr ("," expr)*)? ")" )?;
 
+pub fn parse_stmt<T>(iter: &mut Peekable<T>) -> Result<AST, ParseError>
+where
+    T: Iterator<Item = Token>,
+{
+    accept_token!(iter, Token::Let {
+        let name = expect_token!(iter, Token::Identifier(id) => id);
+        expect_token!(iter, Token::Equals);
+        return Ok(AST::Let(name, Box::new(parse_expr(iter)?)));
+    });
+    parse_expr(iter)
+}
 
 pub fn parse_expr<T>(iter: &mut Peekable<T>) -> Result<AST, ParseError>
 where
