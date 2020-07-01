@@ -5,6 +5,7 @@ mod tokenizer;
 use parser::ParseError;
 use std::io;
 use std::io::{BufRead, Write};
+use std::collections::HashMap;
 
 fn main() {
     loop {
@@ -18,7 +19,7 @@ fn main() {
         .peekable();
         let tree = parser::parse_stmts(&mut lexer);
         match tree {
-            Ok(x) => match backend::evaluate(&x) {
+            Ok(x) => match backend::evaluate(&x, &mut HashMap::new()) {
                 Ok(y) => println!("= {}", y),
                 Err(e) => println!("Interpreter error: {}", e),
             },
